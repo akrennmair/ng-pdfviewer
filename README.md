@@ -3,12 +3,12 @@
 AngularJS PDF viewer directive using pdf.js.
 
 ``` html
-	<button ng-click="prevPage()">&lt;</button>
-	<button ng-click="nextPage()">&gt;</button>
-	<br>
-	<span>{{currentPage}}/{{totalPages}}</span>
-	<br>
-	<pdfviewer src="test.pdf" on-page-load='pageLoaded(page,total)'></pdfviewer>
+<button ng-click="prevPage()">&lt;</button>
+<button ng-click="nextPage()">&gt;</button>
+<br>
+<span>{{currentPage}}/{{totalPages}}</span>
+<br>
+<pdfviewer src="test.pdf" on-page-load='pageLoaded(page,total)'></pdfviewer>
 ```
 
 and in your AngularJS code:
@@ -17,20 +17,21 @@ and in your AngularJS code:
 
 var app = angular.module('testApp', [ 'ngPDFViewer' ]);
 
-// ...
+app.controller('TestCtrl', [ '$scope', 'PDFViewerService', function($scope, pdf) {
 
-$scope.nextPage = function() {
-	$scope.$broadcast('pdfviewer.nextPage');
-};
+	$scope.nextPage = function() {
+		pdf.nextPage();
+	};
 
-$scope.prevPage = function() {
-	$scope.$broadcast('pdfviewer.prevPage');
-};
+	$scope.prevPage = function() {
+		pdf.prevPage();
+	};
 
-$scope.pageLoaded = function(curPage, totalPages) {
-	$scope.currentPage = curPage;
-	$scope.totalPages = totalPages;
-};
+	$scope.pageLoaded = function(curPage, totalPages) {
+		$scope.currentPage = curPage;
+		$scope.totalPages = totalPages;
+	};
+}]);
 ```
 
 ## Requirements

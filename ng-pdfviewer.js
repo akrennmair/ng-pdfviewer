@@ -76,9 +76,23 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			iAttr.$observe('src', function(v) {
 				console.log('src attribute changed, new value is', v);
 				if (v !== undefined && v !== null && v !== '') {
+					scope.pageNum = 1;
 					scope.loadPDF(scope.src);
 				}
 			});
 		}
 	};
+}]).
+service("PDFViewerService", [ '$rootScope', function($rootScope) {
+
+	var svc = { };
+	svc.nextPage = function() {
+		$rootScope.$broadcast('pdfviewer.nextPage');
+	};
+
+	svc.prevPage = function() {
+		$rootScope.$broadcast('pdfviewer.prevPage');
+	};
+
+	return svc;
 }]);
