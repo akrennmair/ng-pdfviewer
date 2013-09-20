@@ -1,9 +1,12 @@
-all: ng-pdfviewer.min.js
+SRC=ng-pdfviewer.js
+MIN_SRC=$(patsubst %.js,dist/%.min.js,$(SRC))
 
-ng-pdfviewer.min.js: ng-pdfviewer.js
+all: $(MIN_SRC)
+
+dist/%.min.js: %.js
 	closure-compiler --js $< --js_output_file $@
 
 check:
-	jshint ng-pdfviewer.js
+	jshint $(SRC)
 
 .PHONY: check
