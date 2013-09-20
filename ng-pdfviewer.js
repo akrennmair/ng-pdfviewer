@@ -8,7 +8,8 @@ directive('pdfviewer', [ '$parse', function($parse) {
 		restrict: "E",
 		template: '<canvas></canvas>',
 		scope: {
-			onPageLoad: '&'
+			onPageLoad: '&',
+			src: '@'
 		},
 		controller: [ '$scope', function($scope) {
 			$scope.pageNum = 1;
@@ -72,9 +73,12 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			canvas = iElement.find('canvas')[0];
 			console.log('link called. src = ', iAttr.src);
 
-			callback = $parse(iAttr.onPageLoad);
-
-			scope.loadPDF(iAttr.src);
+			iAttr.$observe('src', function(v) {
+				console.log('src attribute changed, new value is', v);
+				if (v !== undefined && v !== null && v !== '') {
+					scope.loadPDF(scope.src);
+				}
+			});
 		}
 	};
 }]);
