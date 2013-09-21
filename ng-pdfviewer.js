@@ -10,32 +10,39 @@ directive('pdfviewer', [ '$parse', function($parse) {
 		template: '<canvas></canvas>',
 		scope: {
 			onPageLoad: '&',
+			loadProgress: '&',
 			src: '@',
 			id: '='
 		},
 		controller: [ '$scope', function($scope) {
 			$scope.pageNum = 1;
-			$scope.loadProgress = 0;
 			$scope.pdfDoc = null;
 			$scope.scale = 1.0;
 
+			$scope.documentProgress = function(progressData) {
+				if ($scope.loadProgress) {
+					$scope.loadProgress({state: "loading", loaded: progressData.loaded, total: progressData.total});
+				}
+			};
+
 			$scope.loadPDF = function(path) {
 				console.log('loadPDF ', path);
-				PDFJS.getDocument(path).then(function(_pdfDoc) {
+				PDFJS.getDocument(path, null, null, $scope.documentProgress).then(function(_pdfDoc) {
 					$scope.pdfDoc = _pdfDoc;
 					$scope.renderPage($scope.pageNum, function(success) {
-						$scope.loadProgress = 0;
+						if ($scope.loadProgress) {
+							$scope.loadProgress({state: "finished", loaded: 0, total: 0});
+						}
 					});
 				}, function(message, exception) {
 					console.log("PDF load error: " + message);
-					throw exception;
-				}, function(progressData) {
-					$scope.loadProgress = (100 * progressData.loaded) / progressData.total;
-					$scope.loadProgress = Math.round($scope.loadProgress*100)/100;
+					if ($scope.loadProgress) {
+						$scope.loadProgress({state: "error", loaded: 0, total: 0});
+					}
 				});
 			};
 
-			$scope.renderPage = function(num) {
+			$scope.renderPage = function(num, callback) {
 				console.log('renderPage ', num);
 				$scope.pdfDoc.getPage(num).then(function(page) {
 					var viewport = page.getViewport($scope.scale);
@@ -46,11 +53,17 @@ directive('pdfviewer', [ '$parse', function($parse) {
 
 					page.render({ canvasContext: ctx, viewport: viewport }).then(
 						function() { 
+							if (callback) {
+								callback(true);
+							}
 							$scope.$apply(function() {
 								$scope.onPageLoad({ page: $scope.pageNum, total: $scope.pdfDoc.numPages });
 							});
 						}, 
 						function() {
+							if (callback) {
+								callback(false);
+							}
 							console.log('page.render failed');
 						}
 					);
