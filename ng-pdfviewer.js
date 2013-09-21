@@ -3,13 +3,15 @@
 angular.module('ngPDFViewer', []).
 directive('pdfviewer', [ '$parse', function($parse) {
 	var canvas = null;
+	var instance_id = null;
 
 	return {
 		restrict: "E",
 		template: '<canvas></canvas>',
 		scope: {
 			onPageLoad: '&',
-			src: '@'
+			src: '@',
+			id: '='
 		},
 		controller: [ '$scope', function($scope) {
 			$scope.pageNum = 1;
@@ -55,23 +57,42 @@ directive('pdfviewer', [ '$parse', function($parse) {
 				});
 			};
 
-			$scope.$on('pdfviewer.nextPage', function() {
+			$scope.$on('pdfviewer.nextPage', function(evt, id) {
+				if (id !== instance_id) {
+					return;
+				}
+
 				if ($scope.pageNum < $scope.pdfDoc.numPages) {
 					$scope.pageNum++;
 					$scope.renderPage($scope.pageNum);
 				}
 			});
 
-			$scope.$on('pdfviewer.prevPage', function() {
+			$scope.$on('pdfviewer.prevPage', function(evt, id) {
+				if (id !== instance_id) {
+					return;
+				}
+
 				if ($scope.pageNum > 1) {
 					$scope.pageNum--;
+					$scope.renderPage($scope.pageNum);
+				}
+			});
+
+			$scope.$on('pdfviewer.gotoPage', function(evt, id, page) {
+				if (id !== instance_id) {
+					return;
+				}
+
+				if (page >= 1 && page <= $scope.pdfDoc.numPages) {
+					$scope.pageNum = page;
 					$scope.renderPage($scope.pageNum);
 				}
 			});
 		} ],
 		link: function(scope, iElement, iAttr) {
 			canvas = iElement.find('canvas')[0];
-			console.log('link called. src = ', iAttr.src);
+			instance_id = iAttr.id;
 
 			iAttr.$observe('src', function(v) {
 				console.log('src attribute changed, new value is', v);
@@ -92,6 +113,22 @@ service("PDFViewerService", [ '$rootScope', function($rootScope) {
 
 	svc.prevPage = function() {
 		$rootScope.$broadcast('pdfviewer.prevPage');
+	};
+
+	svc.Instance = function(id) {
+		var instance_id = id;
+
+		return {
+			prevPage: function() {
+				$rootScope.$broadcast('pdfviewer.prevPage', instance_id);
+			},
+			nextPage: function() {
+				$rootScope.$broadcast('pdfviewer.nextPage', instance_id);
+			},
+			gotoPage: function(page) {
+				$rootScope.$broadcast('pdfviewer.gotoPage', instance_id, page);
+			}
+		};
 	};
 
 	return svc;

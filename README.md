@@ -8,7 +8,7 @@ AngularJS PDF viewer directive using pdf.js.
 <br>
 <span>{{currentPage}}/{{totalPages}}</span>
 <br>
-<pdfviewer src="test.pdf" on-page-load='pageLoaded(page,total)'></pdfviewer>
+<pdfviewer src="test.pdf" on-page-load='pageLoaded(page,total)' id="viewer"></pdfviewer>
 ```
 
 and in your AngularJS code:
@@ -18,13 +18,14 @@ and in your AngularJS code:
 var app = angular.module('testApp', [ 'ngPDFViewer' ]);
 
 app.controller('TestCtrl', [ '$scope', 'PDFViewerService', function($scope, pdf) {
+	$scope.viewer = pdf.Instance("viewer");
 
 	$scope.nextPage = function() {
-		pdf.nextPage();
+		$scope.viewer.nextPage();
 	};
 
 	$scope.prevPage = function() {
-		pdf.prevPage();
+		$scope.viewer.prevPage();
 	};
 
 	$scope.pageLoaded = function(curPage, totalPages) {
