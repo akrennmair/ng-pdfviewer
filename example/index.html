@@ -14,8 +14,10 @@
 			<button ng-click="pdfURL='test.pdf'">Load test.pdf</button>
 			<button ng-click="pdfURL='test2.pdf'">Load test2.pdf</button>
 			<br>
+			<button ng-click="gotoPage(1)">|&lt;</button>
 			<button ng-click="prevPage()">&lt;</button>
 			<button ng-click="nextPage()">&gt;</button>
+			<button ng-click="gotoPage(totalPages)">&gt;|</button>
 			<br>
 			<span ng-show="totalPages">{{currentPage}}/{{totalPages}}</span>
 			<br>
