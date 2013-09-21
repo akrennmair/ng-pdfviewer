@@ -1,4 +1,10 @@
-// AngularJS PDF viewer directive using pdf.js.
+/**
+ * @preserve AngularJS PDF viewer directive using pdf.js.
+ *
+ * https://github.com/akrennmair/ng-pdfviewer 
+ *
+ * MIT license
+ */
 
 angular.module('ngPDFViewer', []).
 directive('pdfviewer', [ '$parse', function($parse) {
