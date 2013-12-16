@@ -48,6 +48,8 @@ Declare `ngPDFViewer` as dependency to your module.
 
 You can now use the `pdfviewer` tag in your HTML source.
 
+See [Plunker](http://plnkr.co/edit/x56sGo?p=preview) for an example.
+
 ## License
 
 MIT. See README.md for further details.
