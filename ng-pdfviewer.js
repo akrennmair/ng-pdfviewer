@@ -57,7 +57,7 @@ directive('pdfviewer', [ '$parse', function($parse) {
 					canvas.height = viewport.height;
 					canvas.width = viewport.width;
 
-					page.render({ canvasContext: ctx, viewport: viewport }).then(
+					page.render({ canvasContext: ctx, viewport: viewport }).promise.then(
 						function() { 
 							if (callback) {
 								callback(true);
