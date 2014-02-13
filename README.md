@@ -50,7 +50,7 @@ You can now use the `pdfviewer` tag in your HTML source.
 
 ## License
 
-MIT. See README.md for further details.
+MIT. See LICENSE.md for further details.
 
 ## Author
 

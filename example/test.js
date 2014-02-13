@@ -15,6 +15,10 @@ app.controller('TestController', [ '$scope', 'PDFViewerService', function($scope
 		$scope.instance.prevPage();
 	};
 
+	$scope.gotoPage = function(page) {
+		$scope.instance.gotoPage(page);
+	};
+
 	$scope.pageLoaded = function(curPage, totalPages) {
 		$scope.currentPage = curPage;
 		$scope.totalPages = totalPages;
