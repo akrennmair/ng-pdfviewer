@@ -8,12 +8,12 @@
 
 angular.module('ngPDFViewer', []).
     directive('pdfviewer', [ '$parse', function($parse) {
-        var canvas = null;
+        var div = null;
         var instance_id = null;
 
         return {
             restrict: "E",
-            template: '<canvas></canvas>',
+            template: '<div></div>',
             scope: {
                 onPageLoad: '&',
                 loadProgress: '&',
@@ -69,10 +69,15 @@ angular.module('ngPDFViewer', []).
                     $scope.pdfDoc.getPage(num).then(function(page) {
                         var viewport = page.getViewport($scope.scale);
 
+                        var canvas = document.createElement("canvas");
+                        canvas.style.display = "block";
+
                         var ctx = canvas.getContext('2d');
 
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
+
+                        div.appendChild(canvas);
 
                         page.render({ canvasContext: ctx, viewport: viewport }).then(
                             function() {
@@ -127,7 +132,7 @@ angular.module('ngPDFViewer', []).
                 });
             } ],
             link: function(scope, iElement, iAttr) {
-                div = iElement.find('canvas')[0];
+                div = iElement.find('div')[0];
                 instance_id = iAttr.id;
 
                 iAttr.$observe('src', function(v) {
