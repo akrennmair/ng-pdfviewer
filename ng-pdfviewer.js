@@ -31,9 +31,24 @@ directive('pdfviewer', [ '$parse', function($parse) {
 				}
 			};
 
+            $scope.convertDataURIToBinary = function (dataURI) {
+                var BASE64_MARKER = ';base64,';
+                var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+                var base64 = dataURI.substring(base64Index);
+                var raw = window.atob(base64);
+                var rawLength = raw.length;
+                var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+                for(var i = 0; i < rawLength; i++) {
+                    array[i] = raw.charCodeAt(i);
+                }
+                return array;
+            };
+
 			$scope.loadPDF = function(path) {
-				console.log('loadPDF ', path);
-				PDFJS.getDocument(path, null, null, $scope.documentProgress).then(function(_pdfDoc) {
+                var param = path.substr(0,4) !== 'data' ? path : $scope.convertDataURIToBinary(path);
+                console.log('loadPDF ', path, param);
+				PDFJS.getDocument(param, null, null, $scope.documentProgress).then(function(_pdfDoc) {
 					$scope.pdfDoc = _pdfDoc;
 					$scope.renderPage($scope.pageNum, function(success) {
 						if ($scope.loadProgress) {
@@ -57,7 +72,7 @@ directive('pdfviewer', [ '$parse', function($parse) {
 					canvas.height = viewport.height;
 					canvas.width = viewport.width;
 
-					page.render({ canvasContext: ctx, viewport: viewport }).promise.then(
+					page.render({ canvasContext: ctx, viewport: viewport }).then(
 						function() { 
 							if (callback) {
 								callback(true);
