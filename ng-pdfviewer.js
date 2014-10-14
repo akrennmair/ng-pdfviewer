@@ -10,8 +10,9 @@ angular.module('ngPDFViewer', []).
 directive('pdfviewer', [ '$parse', function($parse) {
 	var canvas = null;
 	var instance_id = null;
+	var width = null;
 
-	return {
+            return {
 		restrict: "E",
 		template: '<canvas></canvas>',
 		scope: {
@@ -66,7 +67,7 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			$scope.renderPage = function(num, callback) {
 				console.log('renderPage ', num);
 				$scope.pdfDoc.getPage(num).then(function(page) {
-					var viewport = page.getViewport($scope.scale);
+                    var viewport = page.getViewport(width / page.getViewport(1.0).width);
 					var ctx = canvas.getContext('2d');
 
 					canvas.height = viewport.height;
@@ -127,6 +128,11 @@ directive('pdfviewer', [ '$parse', function($parse) {
 		link: function(scope, iElement, iAttr) {
 			canvas = iElement.find('canvas')[0];
 			instance_id = iAttr.id;
+
+            if(typeof iAttr.width !== 'undefined')
+            {
+                width = parseInt(iAttr.width);
+            }
 
 			iAttr.$observe('src', function(v) {
 				console.log('src attribute changed, new value is', v);
