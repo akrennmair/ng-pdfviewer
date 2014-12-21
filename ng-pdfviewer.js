@@ -7,7 +7,7 @@
  */
 
 angular.module('ngPDFViewer', []).
-directive('pdfviewer', [ '$parse', function($parse) {
+directive('pdfviewer', [ '$parse','$log', function($parse, $log) {
 	var canvas = null;
 	var instance_id = null;
 
@@ -32,7 +32,7 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.loadPDF = function(path) {
-				console.log('loadPDF ', path);
+				$log.log('loadPDF ', path);
 				PDFJS.getDocument(path, null, null, $scope.documentProgress).then(function(_pdfDoc) {
 					$scope.pdfDoc = _pdfDoc;
 					$scope.renderPage($scope.pageNum, function(success) {
@@ -41,7 +41,7 @@ directive('pdfviewer', [ '$parse', function($parse) {
 						}
 					});
 				}, function(message, exception) {
-					console.log("PDF load error: " + message);
+					$log.log("PDF load error: " + message + " <" + exception + "> ");
 					if ($scope.loadProgress) {
 						$scope.loadProgress({state: "error", loaded: 0, total: 0});
 					}
@@ -70,7 +70,7 @@ directive('pdfviewer', [ '$parse', function($parse) {
 							if (callback) {
 								callback(false);
 							}
-							console.log('page.render failed');
+							$log.log('page.render failed');
 						}
 					);
 				});
@@ -114,7 +114,7 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			instance_id = iAttr.id;
 
 			iAttr.$observe('src', function(v) {
-				console.log('src attribute changed, new value is', v);
+				$log.log('src attribute changed, new value is', v);
 				if (v !== undefined && v !== null && v !== '') {
 					scope.pageNum = 1;
 					scope.loadPDF(scope.src);
