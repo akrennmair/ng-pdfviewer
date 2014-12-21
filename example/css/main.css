@@ -1,0 +1,16 @@
+.pdf{
+    background-color: #4d4d4d;
+}
+
+.pdf canvas:first-child {
+    margin-top: 15px;
+}
+
+.pdf canvas{
+    margin-top: 25px;
+    box-shadow: 4px 4px black;
+}
+
+.pdf canvas:last-child{
+    margin-bottom: 15px;
+}
