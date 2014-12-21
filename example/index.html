@@ -28,7 +28,7 @@
 				<span class="label" ng-show="totalPages">{{currentPage}}/{{totalPages}}</span>
 			</div>
 			<div class="row">
-				<pdfviewer src="{{pdfURL}}" on-page-load='pageLoaded(page,total)' id="viewer" load-progress='loadProgress(loaded, total, state)'></pdfviewer>
+				<pdfviewer scale="1" src="{{pdfURL}}" on-page-load='pageLoaded(page,total)' id="viewer" load-progress='loadProgress(loaded, total, state)'></pdfviewer>
 			</div>
 		</div>
 	</body>

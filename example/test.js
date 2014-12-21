@@ -4,6 +4,8 @@ app.controller('TestController', [ '$scope', 'PDFViewerService', function($scope
 	console.log('TestController: new instance');
 
 	$scope.pdfURL = "test.pdf";
+	
+	$scope.scale = 1.5;
 
 	$scope.instance = pdf.Instance("viewer");
 
@@ -17,6 +19,10 @@ app.controller('TestController', [ '$scope', 'PDFViewerService', function($scope
 
 	$scope.gotoPage = function(page) {
 		$scope.instance.gotoPage(page);
+	};
+
+	$scope.setScale = function(v) {
+		$scope.scale = 2.0;
 	};
 
 	$scope.pageLoaded = function(curPage, totalPages) {

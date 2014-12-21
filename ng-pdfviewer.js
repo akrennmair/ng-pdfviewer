@@ -18,17 +18,22 @@ directive('pdfviewer', [ '$parse','$log', function($parse, $log) {
 			onPageLoad: '&',
 			loadProgress: '&',
 			src: '@',
+			scale: '@',
 			id: '='
 		},
 		controller: [ '$scope', function($scope) {
 			$scope.pageNum = 1;
 			$scope.pdfDoc = null;
-			$scope.scale = 1.0;
+			//$scope.scale = 1.0;
 
 			$scope.documentProgress = function(progressData) {
 				if ($scope.loadProgress) {
 					$scope.loadProgress({state: "loading", loaded: progressData.loaded, total: progressData.total});
 				}
+			};
+			
+			$scope.setScale = function(){
+				$scope.scale = 2;
 			};
 
 			$scope.loadPDF = function(path) {
