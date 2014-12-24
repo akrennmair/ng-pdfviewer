@@ -27,6 +27,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 			$scope.pageNum = 1;
 			$scope.pdfDoc = null;
 			$scope.renderInProgress = false;
+			$scope.forceReRender = true;
 
 			$scope.documentProgress = function(progressData) {
 				if ($scope.loadProgress) {
@@ -34,8 +35,11 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 				}
 			};
 			
-			$scope.setScale = function(){
-				$scope.scale = 2;
+			$scope.setScale = function(newValue){
+				if (angular.isNumber(newValue)) {
+					$scope.scale = newValue;
+					$scope.forceReRender = true;
+				}
 			};
 			
 			$scope.renderDocument = function(){
@@ -48,6 +52,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 						$log.debug("Rendered Page <" + pageNumber + "> SUCCESS <" + success + ">");
 						if (pageNumber==canvas.length){
 							$scope.renderInProgress=false;
+							$scope.forceReRender = false;
 						}
 					});
 				});
@@ -77,6 +82,14 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 
 			$scope.renderPage = function(num, canvas, callback) {
 				$log.debug('renderPage #', num);
+				var renderedPageInCanvas = canvas.getAttribute("rendered");
+				if (renderedPageInCanvas==num && !$scope.forceReRender) {
+					$log.debug("Skipping page <"+num+">");
+					if (callback) {
+						callback(true);
+					}
+					return;
+				}
 				$scope.pdfDoc.getPage(num).then(function(page) {
 					var viewport = page.getViewport($scope.scale);
 					var ctx = canvas.getContext('2d');
@@ -85,7 +98,8 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 					canvas.width = viewport.width;
 
 					page.render({ canvasContext: ctx, viewport: viewport }).then(
-						function() { 
+						function() {
+							canvas.setAttribute("rendered",num);
 							if (callback) {
 								callback(true);
 							}
@@ -102,6 +116,15 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 					);
 				});
 			};
+
+			$scope.$on('pdfviewer.setScale', function(evt, id, scale) {
+				if (id !== instance_id) {
+					return;
+				}
+
+				$scope.setScale(scale);
+				$scope.renderDocument();
+			});
 
 			$scope.$on('pdfviewer.nextPage', function(evt, id) {
 				if (id !== instance_id) {
@@ -160,7 +183,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 			};
 
 			iAttr.$observe('src', function(v) {
-				$log.debug('src attribute changed, new value is', v);
+				$log.debug('src attribute changed, new value is <' + v + '>');
 				if (v !== undefined && v !== null && v !== '') {
 					scope.pageNum = 1;
 					scope.loadPDF(scope.src).then(function (pdfDoc){
@@ -191,6 +214,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 				//SKIP if rendering is in progress or document not loaded
 				if(scope.pdfDoc==null || scope.renderInProgress || !angular.isNumber(parseInt(v)))
 					return;
+				$scope.forceReRender = true;
 				$log.debug('scale attribute changed, new value is <' + v + ">");
 				scope.renderDocument();
 			});
@@ -221,6 +245,9 @@ service("PDFViewerService", [ '$rootScope', function($rootScope) {
 			},
 			gotoPage: function(page) {
 				$rootScope.$broadcast('pdfviewer.gotoPage', instance_id, page);
+			},
+			setScale: function(scale) {
+				$rootScope.$broadcast('pdfviewer.setScale', instance_id, scale);
 			}
 		};
 	};
