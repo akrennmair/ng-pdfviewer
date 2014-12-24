@@ -26,6 +26,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 		controller: [ '$scope', function($scope) {
 			$scope.pageNum = 1;
 			$scope.pdfDoc = null;
+			$scope.renderInProgress = false;
 
 			$scope.documentProgress = function(progressData) {
 				if ($scope.loadProgress) {
@@ -38,21 +39,26 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 			};
 			
 			$scope.renderDocument = function(){
-				$log.log("Render Document");
+				$log.debug("Render Document");
 				angular.forEach(canvas, function(c,index){
+					if (index==0)
+						$scope.renderInProgress=true;
 					var pageNumber = index + $scope.pageNum;
 					$scope.renderPage(pageNumber, c, function(success) {
-						$log.log("Rendering Page <" + pageNumber + "> SUCCESS <" + success + ">");
+						$log.debug("Rendered Page <" + pageNumber + "> SUCCESS <" + success + ">");
+						if (pageNumber==canvas.length){
+							$scope.renderInProgress=false;
+						}
 					});
 				});
 			};
 
 			$scope.loadPDF = function(path) {
-				$log.log('loadPDF ', path);
+				$log.debug('loadPDF ', path);
 
 				var deferred = $q.defer();
 				PDFJS.getDocument(path, null, null, $scope.documentProgress).then(function(_pdfDoc) {
-					$log.log("Document read");
+					$log.debug("Document read");
 
 					$scope.pdfDoc = _pdfDoc;
 					if ($scope.loadProgress) {
@@ -60,7 +66,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 					}
 					deferred.resolve($scope.pdfDoc);
 				}, function(message, exception) {
-					$log.log("PDF load error: " + message + " <" + exception + "> ");
+					$log.debug("PDF load error: " + message + " <" + exception + "> ");
 					deferred.reject(message);
 					if ($scope.loadProgress) {
 						$scope.loadProgress({state: "error", loaded: 0, total: 0});
@@ -70,7 +76,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 			};
 
 			$scope.renderPage = function(num, canvas, callback) {
-				$log.log('renderPage ', num);
+				$log.debug('renderPage #', num);
 				$scope.pdfDoc.getPage(num).then(function(page) {
 					var viewport = page.getViewport($scope.scale);
 					var ctx = canvas.getContext('2d');
@@ -91,7 +97,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 							if (callback) {
 								callback(false);
 							}
-							$log.log('page.render failed');
+							$log.debug('page.render failed');
 						}
 					);
 				});
@@ -131,57 +137,64 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 			});
 		} ],
 		link: function(scope, iElement, iAttr) {
-			
+
+			instance_id = iAttr.id;
+
 			createCanvas = function(iElement, count){
-				var i = 0;
 				canvas = iElement.find('canvas');
-				for (i = 0; i<canvas.length; i++){
-					angular.element(canvas[i]).remove();
-				}
-				for (i = 0; i<count; i++){
-					var tmpCanvas = angular.element('<canvas>');
-					tmpCanvas[0].setAttribute("id","page"+(i+1));
-					iElement.append(tmpCanvas);
+				
+				if (canvas.length>count){
+					//I need to remove canvases
+					for (var i=count; i<canvas.length; i++){
+						angular.element(canvas[i]).remove();
+					}
+				} else{
+					//I need to add more canvas
+					for (var i=canvas.length; i<count; i++){
+						var tmpCanvas = angular.element('<canvas>');
+						tmpCanvas[0].setAttribute("id","page"+(i+1));
+						iElement.append(tmpCanvas);
+					}
 				}
 				canvas = iElement.find('canvas');
 			};
-			
-			instance_id = iAttr.id;
 
 			iAttr.$observe('src', function(v) {
-				$log.log('src attribute changed, new value is', v);
+				$log.debug('src attribute changed, new value is', v);
 				if (v !== undefined && v !== null && v !== '') {
 					scope.pageNum = 1;
 					scope.loadPDF(scope.src).then(function (pdfDoc){
-						$log.log('PDF Loaded');
+						$log.debug('PDF Loaded');
 						scope.pagesToShow = scope.pagesToShow==0?scope.pdfDoc.numPages : scope.pagesToShow;
 						createCanvas(iElement,scope.pagesToShow);
 						scope.renderDocument();
 
-						iAttr.$observe('pagesToShow', function(v) {
-							$log.log('pages-to-show attribute changed, new value is <' + v + ">");
-							scope.pagesToShow = scope.pagesToShow==0?scope.pdfDoc.numPages : scope.pagesToShow;
-
-							createCanvas(iElement,scope.pagesToShow);
-
-							if (scope.pdfDoc!=null) {
-								scope.renderDocument();
-							}
-						});
-
-
-						iAttr.$observe('scale', function(v) {
- 							$log.log('scale attribute changed, new value is <' + v + ">");
-							scope.scale = v;
-							if (scope.pdfDoc!=null)
-								scope.renderDocument();
-						});
-
 					}, function(meg){
-						$log.log(meg);
+						$log.debug(meg);
 					});
 				}
 			});
+			
+			iAttr.$observe('pagesToShow', function(v) {
+				//SKIP if rendering is in progress or document not loaded
+				if(scope.pdfDoc==null || scope.renderInProgress || !angular.isNumber(parseInt(v)))
+					return;
+				
+				$log.debug('pages-to-show attribute changed, new value is <' + v + ">");
+				scope.pagesToShow = scope.pagesToShow==0 ? scope.pdfDoc.numPages : scope.pagesToShow;
+
+				createCanvas(iElement,scope.pagesToShow);
+				scope.renderDocument();
+			});
+
+			iAttr.$observe('scale', function(v) {
+				//SKIP if rendering is in progress or document not loaded
+				if(scope.pdfDoc==null || scope.renderInProgress || !angular.isNumber(parseInt(v)))
+					return;
+				$log.debug('scale attribute changed, new value is <' + v + ">");
+				scope.renderDocument();
+			});
+
 		}
 	};
 }]).
