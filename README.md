@@ -5,16 +5,16 @@ AngularJS PDF viewer directive using pdf.js.
 ``` html
 <button ng-click="prevPage()">&lt;</button>
 <button ng-click="nextPage()">&gt;</button>
+<button ng-click="setScale(1.8)">ZOOM</button>
 <br>
 <span>{{currentPage}}/{{totalPages}}</span>
 <br>
-<pdfviewer src="test.pdf" on-page-load='pageLoaded(page,total)' id="viewer"></pdfviewer>
+<pdfviewer scale="{{scale}}" pages-to-show="{{pages}}" src="test.pdf" on-page-load='pageLoaded(page,total)' id="viewer"></pdfviewer>
 ```
 
 and in your AngularJS code:
 
 ``` js
-
 var app = angular.module('testApp', [ 'ngPDFViewer' ]);
 
 app.controller('TestCtrl', [ '$scope', 'PDFViewerService', function($scope, pdf) {
@@ -26,6 +26,10 @@ app.controller('TestCtrl', [ '$scope', 'PDFViewerService', function($scope, pdf)
 
 	$scope.prevPage = function() {
 		$scope.viewer.prevPage();
+	};
+
+	$scope.setScale = function(v) {
+		$scope.instance.setScale(v);
 	};
 
 	$scope.pageLoaded = function(curPage, totalPages) {
