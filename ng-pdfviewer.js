@@ -7,7 +7,7 @@
  */
 
 angular.module('ngPDFViewer', []).
-directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
+directive('pdfviewer', [ '$log', '$q', function($log, $q) {
 	var _pageToShow = 1;
 	var canvas = [];
 	var instance_id = null;
@@ -81,7 +81,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 			};
 
 			$scope.renderPage = function(num, canvas, callback) {
-				$log.debug('renderPage #', num);
+				$log.debug('renderPage #' + num);
 				var renderedPageInCanvas = canvas.getAttribute("rendered");
 				if (renderedPageInCanvas==num && !$scope.forceReRender) {
 					$log.debug("Skipping page <"+num+">");
