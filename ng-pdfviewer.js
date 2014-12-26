@@ -59,7 +59,7 @@ directive('pdfviewer', [ '$parse','$log', '$q', function($parse, $log, $q) {
 			};
 
 			$scope.loadPDF = function(path) {
-				$log.debug('loadPDF ', path);
+				$log.debug("loadPDF <"+ path+">");
 
 				var deferred = $q.defer();
 				PDFJS.getDocument(path, null, null, $scope.documentProgress).then(function(_pdfDoc) {
