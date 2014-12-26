@@ -200,8 +200,10 @@ directive('pdfviewer', [ '$log', '$q', function($log, $q) {
 			
 			iAttr.$observe('pagesToShow', function(v) {
 				//SKIP if rendering is in progress or document not loaded
-				if(scope.pdfDoc==null || scope.renderInProgress || !angular.isNumber(parseInt(v)))
+				if(scope.pdfDoc==null || scope.renderInProgress || !angular.isNumber(parseInt(v))) {
+					scope.pagesToShow = _pageToShow;
 					return;
+				}
 				
 				$log.debug('pages-to-show attribute changed, new value is <' + v + ">");
 				scope.pagesToShow = scope.pagesToShow==0 ? scope.pdfDoc.numPages : scope.pagesToShow;
