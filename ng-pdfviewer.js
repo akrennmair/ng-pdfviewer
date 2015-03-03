@@ -7,7 +7,7 @@
  */
 
 angular.module('ngPDFViewer', []).
-directive('pdfviewer', [ '$parse', function($parse) {
+directive('pdfviewer', function() {
 	var canvas = null;
 	var instance_id = null;
 
@@ -17,14 +17,12 @@ directive('pdfviewer', [ '$parse', function($parse) {
 		scope: {
 			onPageLoad: '&',
 			loadProgress: '&',
-			src: '@',
-			pageNum: '@?',
-			scale: '@?',
+			src: '=',
+			pageNum: '=',
+			scale: '=',
 			id: '='
 		},
 		controller: [ '$scope', function($scope) {
-			$scope.pageNum = undefined ? 1: parseInt($scope.pageNum, 10);
-			$scope.scale = $scope.scale === undefined ? 1.0 : parseFloat($scope.scale);
 			$scope.pdfDoc = null;
 
 			$scope.documentProgress = function(progressData) {
@@ -50,8 +48,11 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.renderPage = function(num, callback) {
-				$scope.pdfDoc.getPage($scope.pageNum).then(function(page) {
-					var viewport = page.getViewport($scope.scale);
+				num = undefined ? 1: parseInt(num, 10);
+				var scale = $scope.scale === undefined ? 1.0 : parseFloat($scope.scale);
+
+				$scope.pdfDoc.getPage(num).then(function(page) {
+					var viewport = page.getViewport(parseFloat(scale));
 					var ctx = canvas.getContext('2d');
 
 					canvas.height = viewport.height;
@@ -113,26 +114,26 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			canvas = iElement.find('canvas')[0];
 			instance_id = iAttr.id;
 
-			iAttr.$observe('src', function(v) {
+			scope.$watch('src', function(v) {
 				if (v !== undefined && v !== null && v !== '') {
 					scope.loadPDF(scope.src);
 				}
 			});
 
-			iAttr.$observe('pageNum', function(v) {
-				if (v !== undefined && v !== null && v !== '' && scope.pdfDoc !== null) {
-					scope.renderPage(v);
+                        scope.$watch('pageNum', function(v) {
+				if (scope.pdfDoc !== null) {
+					scope.renderPage(scope.pageNum);
 				}
 			});
 
-			iAttr.$observe('scale', function(v) {
-				if (v !== undefined && v !== null && v !== '' && scope.pdfDoc !== null) {
+			scope.$watch('scale', function(v) {
+				if (scope.pdfDoc !== null) {
 					scope.renderPage(scope.pageNum);
 				}
 			});
 		}
 	};
-}]).
+}).
 service("PDFViewerService", [ '$rootScope', function($rootScope) {
 
 	var svc = { };
