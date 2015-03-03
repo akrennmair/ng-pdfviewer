@@ -7,7 +7,7 @@
  */
 
 angular.module('ngPDFViewer', []).
-directive('pdfviewer', [ '$parse', function($parse) {
+directive('pdfviewer', function() {
 	var canvas = null;
 	var instance_id = null;
 
@@ -17,13 +17,13 @@ directive('pdfviewer', [ '$parse', function($parse) {
 		scope: {
 			onPageLoad: '&',
 			loadProgress: '&',
-			src: '@',
+			src: '=',
+			pageNum: '=',
+			scale: '=',
 			id: '='
 		},
 		controller: [ '$scope', function($scope) {
-			$scope.pageNum = 1;
 			$scope.pdfDoc = null;
-			$scope.scale = 1.0;
 
 			$scope.documentProgress = function(progressData) {
 				if ($scope.loadProgress) {
@@ -32,7 +32,6 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.loadPDF = function(path) {
-				console.log('loadPDF ', path);
 				PDFJS.getDocument(path, null, null, $scope.documentProgress).then(function(_pdfDoc) {
 					$scope.pdfDoc = _pdfDoc;
 					$scope.renderPage($scope.pageNum, function(success) {
@@ -49,9 +48,11 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.renderPage = function(num, callback) {
-				console.log('renderPage ', num);
+				num = undefined ? 1: parseInt(num, 10);
+				var scale = $scope.scale === undefined ? 1.0 : parseFloat($scope.scale);
+
 				$scope.pdfDoc.getPage(num).then(function(page) {
-					var viewport = page.getViewport($scope.scale);
+					var viewport = page.getViewport(parseFloat(scale));
 					var ctx = canvas.getContext('2d');
 
 					canvas.height = viewport.height;
@@ -113,16 +114,26 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			canvas = iElement.find('canvas')[0];
 			instance_id = iAttr.id;
 
-			iAttr.$observe('src', function(v) {
-				console.log('src attribute changed, new value is', v);
+			scope.$watch('src', function(v) {
 				if (v !== undefined && v !== null && v !== '') {
-					scope.pageNum = 1;
 					scope.loadPDF(scope.src);
+				}
+			});
+
+                        scope.$watch('pageNum', function(v) {
+				if (scope.pdfDoc !== null) {
+					scope.renderPage(scope.pageNum);
+				}
+			});
+
+			scope.$watch('scale', function(v) {
+				if (scope.pdfDoc !== null) {
+					scope.renderPage(scope.pageNum);
 				}
 			});
 		}
 	};
-}]).
+}).
 service("PDFViewerService", [ '$rootScope', function($rootScope) {
 
 	var svc = { };

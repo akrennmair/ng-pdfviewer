@@ -8,7 +8,7 @@ AngularJS PDF viewer directive using pdf.js.
 <br>
 <span>{{currentPage}}/{{totalPages}}</span>
 <br>
-<pdfviewer src="test.pdf" on-page-load='pageLoaded(page,total)' id="viewer"></pdfviewer>
+<pdfviewer src="test.pdf" on-page-load="pageLoaded(page,total)" page-num="1" scale="1.2" id="viewer"></pdfviewer>
 ```
 
 and in your AngularJS code:
