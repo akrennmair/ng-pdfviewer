@@ -23,6 +23,8 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			id: '='
 		},
 		controller: [ '$scope', function($scope) {
+			$scope.pageNum = undefined ? 1: parseInt($scope.pageNum, 10);
+			$scope.scale = $scope.scale === undefined ? 1.0 : parseFloat($scope.scale);
 			$scope.pdfDoc = null;
 
 			$scope.documentProgress = function(progressData) {
@@ -48,10 +50,8 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.renderPage = function(num, callback) {
-				num = num === undefined ? 1: parseInt(num, 10);
-				var scale = $scope.scale === undefined ? 1.0 : parseFloat($scope.scale);
-				$scope.pdfDoc.getPage(num).then(function(page) {
-					var viewport = page.getViewport(scale);
+				$scope.pdfDoc.getPage($scope.pageNum).then(function(page) {
+					var viewport = page.getViewport($scope.scale);
 					var ctx = canvas.getContext('2d');
 
 					canvas.height = viewport.height;
@@ -116,6 +116,18 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			iAttr.$observe('src', function(v) {
 				if (v !== undefined && v !== null && v !== '') {
 					scope.loadPDF(scope.src);
+				}
+			});
+
+			iAttr.$observe('pageNum', function(v) {
+				if (v !== undefined && v !== null && v !== '' && scope.pdfDoc !== null) {
+					scope.renderPage(v);
+				}
+			});
+
+			iAttr.$observe('scale', function(v) {
+				if (v !== undefined && v !== null && v !== '' && scope.pdfDoc !== null) {
+					scope.renderPage(scope.pageNum);
 				}
 			});
 		}
