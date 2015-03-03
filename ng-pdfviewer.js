@@ -32,7 +32,6 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.loadPDF = function(path) {
-				console.log('loadPDF ', path);
 				PDFJS.getDocument(path, null, null, $scope.documentProgress).then(function(_pdfDoc) {
 					$scope.pdfDoc = _pdfDoc;
 					$scope.renderPage($scope.pageNum, function(success) {
@@ -49,7 +48,6 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			};
 
 			$scope.renderPage = function(num, callback) {
-				console.log('renderPage ', num);
 				num = num === undefined ? 1: parseInt(num, 10);
 				var scale = $scope.scale === undefined ? 1.0 : parseFloat($scope.scale);
 				$scope.pdfDoc.getPage(num).then(function(page) {
@@ -116,7 +114,6 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			instance_id = iAttr.id;
 
 			iAttr.$observe('src', function(v) {
-				console.log('src attribute changed, new value is', v);
 				if (v !== undefined && v !== null && v !== '') {
 					scope.loadPDF(scope.src);
 				}
