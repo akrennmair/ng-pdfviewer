@@ -18,12 +18,12 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			onPageLoad: '&',
 			loadProgress: '&',
 			src: '@',
+			pageNum: '@?',
+			scale: '@?',
 			id: '='
 		},
 		controller: [ '$scope', function($scope) {
-			$scope.pageNum = 1;
 			$scope.pdfDoc = null;
-			$scope.scale = 1.0;
 
 			$scope.documentProgress = function(progressData) {
 				if ($scope.loadProgress) {
@@ -50,8 +50,10 @@ directive('pdfviewer', [ '$parse', function($parse) {
 
 			$scope.renderPage = function(num, callback) {
 				console.log('renderPage ', num);
+				num = num === undefined ? 1: parseInt(num, 10);
+				var scale = $scope.scale === undefined ? 1.0 : parseFloat($scope.scale);
 				$scope.pdfDoc.getPage(num).then(function(page) {
-					var viewport = page.getViewport($scope.scale);
+					var viewport = page.getViewport(scale);
 					var ctx = canvas.getContext('2d');
 
 					canvas.height = viewport.height;
@@ -116,7 +118,6 @@ directive('pdfviewer', [ '$parse', function($parse) {
 			iAttr.$observe('src', function(v) {
 				console.log('src attribute changed, new value is', v);
 				if (v !== undefined && v !== null && v !== '') {
-					scope.pageNum = 1;
 					scope.loadPDF(scope.src);
 				}
 			});
