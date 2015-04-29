@@ -7,7 +7,7 @@
  */
 
 angular.module('ngPDFViewer', []).
-    directive('pdfviewer', [ '$parse', function($parse) {
+    directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
         var canvas = null;
         var instance_id = null;
         var width = null;
@@ -69,10 +69,33 @@ angular.module('ngPDFViewer', []).
 
                 };
 
+                var ratio = 1;
+
+                $scope.setCanvasSize = function()
+                {
+                    var ctx = canvas.getContext('2d');
+                    var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                    var newCanvas = document.createElement('canvas');
+                    $(newCanvas)
+                        .attr("width", imageData.width)
+                        .attr("height", imageData.height);
+
+                    newCanvas.getContext("2d").putImageData(imageData, 0, 0);
+
+                    var scale = width / canvas.width;
+                    canvas.width = width;
+                    canvas.height = width * ratio;
+                    ctx.scale(scale, scale);
+                    ctx.drawImage(newCanvas, 0, 0);
+                };
+
+
                 $scope.renderPage = function(num, callback) {
                     console.log('renderPage ', num);
                     $scope.pdfDoc.getPage(num).then(function(page) {
                         var viewport = page.getViewport(width / page.getViewport(1.0).width);
+                        ratio = viewport.height / viewport.width;
                         var ctx = canvas.getContext('2d');
 
                         canvas.height = viewport.height;
@@ -146,12 +169,19 @@ angular.module('ngPDFViewer', []).
                     width = parseInt(iAttr.width);
                 }
 
+                var loadPdfTimeout = null;
+
                 iAttr.$observe('width', function(v) {
                     console.log('width attribute changed, new value is', v);
                     if(typeof iAttr.width !== 'undefined')
                     {
                         width = parseInt(iAttr.width);
-                        scope.loadPDF(scope.src);
+
+                        scope.setCanvasSize();
+
+                        var loadPdf = function() { scope.loadPDF(scope.src); };
+                        $timeout.cancel(loadPdfTimeout);
+                        loadPdfTimeout = $timeout(loadPdf, 50);
                     }
                 });
 
