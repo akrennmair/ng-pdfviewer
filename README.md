@@ -3,13 +3,13 @@
 AngularJS PDF viewer directive using pdf.js.
 
 ``` html
-    <button ng-disabled="currentPage<=1" class="btn btn-default" ng-click="firstPage()">&laquo;</button>
-    <button ng-disabled="(currentPage-1)<1" class="btn btn-default" ng-click="prevPage()">&lsaquo;</button>
-    <button ng-disabled="(currentPage+1)>totalPages" class="btn btn-default" ng-click="nextPage()">&rsaquo;</button>
-    <button ng-disabled="currentPage>=totalPages" class="btn btn-default" ng-click="lastPage()">&raquo;</button>
-    <button class="btn btn-default" ng-click="zoomIn()"><i class="fa fa-search-plus fa-fw"/></button>
-    <button class="btn btn-default" ng-click="zoomOut()"><i class="fa fa-search-minus fa-fw"/></button>
-    <button class="btn btn-default" ng-click="zoomReset()"><i class="fa fa-search fa-fw"/></button>
+<button ng-disabled="currentPage<=1" class="btn btn-default" ng-click="firstPage()">&laquo;</button>
+<button ng-disabled="(currentPage-1)<1" class="btn btn-default" ng-click="prevPage()">&lsaquo;</button>
+<button ng-disabled="(currentPage+1)>totalPages" class="btn btn-default" ng-click="nextPage()">&rsaquo;</button>
+<button ng-disabled="currentPage>=totalPages" class="btn btn-default" ng-click="lastPage()">&raquo;</button>
+<button class="btn btn-default" ng-click="zoomIn()"><i class="fa fa-search-plus fa-fw"/></button>
+<button class="btn btn-default" ng-click="zoomOut()"><i class="fa fa-search-minus fa-fw"/></button>
+<button class="btn btn-default" ng-click="zoomReset()"><i class="fa fa-search fa-fw"/></button>
 <br>
 <span>{{currentPage}}/{{totalPages}}</span>
 <br>
@@ -77,6 +77,10 @@ Include `ng-pdfviewer.js` as JavaScript file, along with `pdf.js` and `pdf.compa
 Declare `ngPDFViewer` as dependency to your module.
 
 You can now use the `pdfviewer` tag in your HTML source.
+
+## Attention
+
+base64 encoded file can't have the "data:application/pdf;base64," prefix. Remove it before load.
 
 ## License
 
