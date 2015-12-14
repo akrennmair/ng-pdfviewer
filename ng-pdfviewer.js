@@ -13,6 +13,7 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
     var width = null;
     var height = null;
     var renderPromise = null;
+    var pageFit = false;
 
         return {
             restrict: "E",
@@ -86,18 +87,36 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 
                 var scale;
 
-                if(height === null)
+                if (pageFit)
                 {
+                    // First, set according to width
                     scale = width / canvas.width;
-                    canvas.width = width;
-                    canvas.height = width * ratio;
+
+                    // Then, make sure height is not too much
+                    if(scale * canvas.height > height)
+                    {
+                        scale = height / canvas.height;
+                    }
+
+                    canvas.width = width * scale;
+                    canvas.height = height * scale;
                 }
                 else
                 {
-                    scale = height / canvas.height;
-                    canvas.height = height;
-                    canvas.width = height * ratio;
+                    if(height === null)
+                    {
+                        scale = width / canvas.width;
+                        canvas.width = width;
+                        canvas.height = width * ratio;
+                    }
+                    else
+                    {
+                        scale = height / canvas.height;
+                        canvas.height = height;
+                        canvas.width = height * ratio;
+                    }
                 }
+
 
                 ctx.scale(scale, scale);
                 ctx.drawImage(newCanvas, 0, 0);
@@ -177,6 +196,7 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
             link: function(scope, iElement, iAttr) {
                 canvas = iElement.find('canvas')[0];
                 instance_id = iAttr.id;
+                pageFit = iAttr.scale === 'page-fit';
 
             if(typeof iAttr.width !== 'undefined')
             {
