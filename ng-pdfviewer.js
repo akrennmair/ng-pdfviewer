@@ -72,11 +72,19 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
             };
 
             var ratio = 1;
+            var lastImageData;
 
             $scope.setCanvasSize = function()
             {
                 var ctx = canvas.getContext('2d');
-                var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                var imageData;
+
+                if(lastImageData) imageData = lastImageData;
+                else
+                {
+                    imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    lastImageData = imageData;
+                }
 
                 var newCanvas = document.createElement('canvas');
                 $(newCanvas)
@@ -125,6 +133,7 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
 
             $scope.renderPage = function(num, callback) {
                 console.log('renderPage ', num);
+                lastImageData = null;
                 $scope.pdfDoc.getPage(num).then(function(page) {
 
                     var scaling = width / page.getViewport(1.0).width;
@@ -220,7 +229,11 @@ directive('pdfviewer', [ '$parse', '$timeout', function($parse, $timeout) {
                 console.log('width attribute changed, new value is', v);
                 if(typeof iAttr.width !== 'undefined')
                 {
-                    width = parseInt(iAttr.width);
+                    var newWidth = parseInt(iAttr.width);
+                    if(Math.abs(newWidth - width) < 1) // Only re-render if the difference is at least a pixel.
+                        return;
+
+                    width = newWidth;
 
                     scope.setCanvasSize();
 
