@@ -1,5 +1,7 @@
 # ng-pdfviewer
 
+# *** WARNING *** Since I keep getting support requests for this: I haven't maintained ng-pdfviewer for ages, and I do not plan to do any further work on it. DO NOT USE THIS IN PRODUCTION!!!
+
 AngularJS PDF viewer directive using pdf.js.
 
 ``` html
