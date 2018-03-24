@@ -5,6 +5,10 @@ app.controller('TestController', [ '$scope', 'PDFViewerService', function($scope
 
 	$scope.pdfURL = "test.pdf";
 
+	$scope.scale = 1;
+
+	$scope.pages = 0;
+
 	$scope.instance = pdf.Instance("viewer");
 
 	$scope.nextPage = function() {
@@ -17,6 +21,10 @@ app.controller('TestController', [ '$scope', 'PDFViewerService', function($scope
 
 	$scope.gotoPage = function(page) {
 		$scope.instance.gotoPage(page);
+	};
+
+	$scope.setScale = function(v) {
+		$scope.instance.setScale(v);
 	};
 
 	$scope.pageLoaded = function(curPage, totalPages) {
